@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>טופס תיעוד עבודה - ח. סבן חומרי בנין</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body { font-family: 'Assistant', sans-serif; background-color: #e0f2f7; /* Very light blue background */ }
+        .form-section {
+            background: rgba(255, 255, 255, 0.7); /* More transparent white for glassmorphism */
+            border-radius: 1.25rem; /* More rounded corners */
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.2); /* Deeper shadow */
+            backdrop-filter: blur(15px); /* Stronger glassmorphism blur */
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3); /* More defined white border */
+            transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smoother entrance animation */
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        .form-section.active-page {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .progress-step { transition: all 0.4s ease-in-out; }
+        .progress-step-active { background-color: #007bff; color: white; transform: scale(1.1); } /* Slight scale for active step */
+        .progress-step-inactive { background-color: #a7d9ed; /* Lighter blue for inactive */ }
+        .progress-line { background-color: #a7d9ed; height: 5px; transition: all 0.4s ease-in-out; }
+        
+        /* Enhanced Primary Button */
+        .btn-primary { 
+            background: linear-gradient(145deg, #007bff, #004c99); /* Deeper blue gradient */
+            color: white; 
+            transition: all 0.3s ease-in-out; 
+            transform: scale(1);
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4); /* Stronger, bluer glow */
+            border: none;
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.75rem; /* Consistent rounded corners */
+            font-weight: 700; /* Bolder text */
+        }
+        .btn-primary:hover { 
+            background: linear-gradient(145deg, #004c99, #007bff); /* Reverse gradient on hover */ 
+            transform: scale(1.03); /* Subtle scale */
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.5); /* Even stronger glow */
+        }
+        .btn-primary:active {
+            transform: scale(0.97); /* Click animation */
+            box-shadow: 0 2px 10px rgba(0, 123, 255, 0.2);
+        }
+        .btn-primary::after { /* Bubble effect */
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.6); /* Brighter bubble */
+            opacity: 0;
+            border-radius: 50%;
+            transform: scale(1) translate(-50%, -50%);
+            transition: all 0.6s ease-out; /* Slower, smoother bubble */
+        }
+        .btn-primary:active::after {
+            transform: scale(150) translate(-50%, -50%); /* Larger bubble */
+            opacity: 1;
+        }
+
+        /* Enhanced Secondary Button */
+        .btn-secondary { 
+            background-color: #8899a6; /* Slightly lighter gray */ 
+            color: white; 
+            transition: all 0.2s ease-in-out; 
+            transform: scale(1);
+            box-shadow: 0 4px 6px rgba(108, 117, 125, 0.2);
+            border: none;
+            border-radius: 0.75rem; /* Consistent rounded corners */
+        }
+        .btn-secondary:hover { 
+            background-color: #6a7680; 
+            transform: scale(1.03);
+            box-shadow: 0 6px 12px rgba(108, 117, 125, 0.3);
+        }
+        .btn-secondary:active {
+            transform: scale(0.97);
+        }
+
+        /* Enhanced Choice Button */
+        .btn-choice { 
+            background-color: rgba(255, 255, 255, 0.6); 
+            border: 1px solid rgba(0, 123, 255, 0.2); 
+            transition: all 0.2s ease-in-out; 
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 0.75rem; /* Consistent rounded corners */
+        }
+        .btn-choice:hover {
+            background-color: rgba(255, 255, 255, 0.9); /* More opaque on hover */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        .btn-choice-active { 
+            background-color: #e0f0ff; 
+            border-color: #007bff; 
+            color: #0056b3; 
+            box-shadow: 0 0 15px rgba(0, 123, 255, 0.5); /* Stronger glow */
+        }
+
+        .signature-pad-container {
+            background: rgba(255, 255, 255, 0.6); 
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4); 
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.15), 0 6px 12px rgba(0, 0, 0, 0.25); /* Deeper inner and outer shadow */
+            border-radius: 1rem; /* More rounded */
+        }
+        .modal-backdrop { background-color: rgba(0, 0, 0, 0.7); } /* Darker, more opaque backdrop */
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95); /* Almost opaque white */
+            border-radius: 1.25rem;
+            box-shadow: 0 10px 40px 0 rgba(31, 38, 135, 0.45); /* Stronger shadow */
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            transform: scale(0.9); /* Start smaller */
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smoother modal animation */
+        }
+        .modal-content.show {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        .responsive-table th, .responsive-table td {
+            padding: 14px 28px; /* More padding */
+            text-align: right;
+            border-bottom: 1px solid #cce7f5; /* Slightly darker blue border */
+        }
+        .responsive-table th {
+            background-color: #d1eaff; /* Brighter blue header */
+            font-weight: 700;
+            color: #004c99; /* Darker blue text */
+        }
+        .responsive-table tbody tr:hover {
+            background-color: #eaf7fc; /* Even lighter blue on hover */
+        }
+        .responsive-table {
+            border-radius: 1rem; /* More rounded table */
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1); /* More prominent shadow */
+        }
+
+        /* Enhanced Driver Messages Section */
+        .message-box {
+            background: linear-gradient(135deg, rgba(224, 240, 255, 0.9), rgba(190, 225, 255, 0.8)); /* Gradient background */
+            border-left: 8px solid #007bff; /* Thicker blue border */
+            padding: 1.25rem;
+            border-radius: 1rem; /* More rounded */
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2); /* Soft blue shadow */
+            animation: fadeInScale 0.6s ease-out; /* New animation */
+        }
+        .message-box.error {
+            background: linear-gradient(135deg, rgba(255, 230, 230, 0.9), rgba(255, 200, 200, 0.8)); /* Red gradient */
+            border-left: 8px solid #dc3545; /* Thicker red border */
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
+        }
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
+        /* WhatsApp Button */
+        .whatsapp-btn {
+            background: linear-gradient(145deg, #25D366, #128C7E); /* WhatsApp gradient */
+            color: white;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+            border-radius: 0.75rem; /* Consistent rounded corners */
+            font-weight: 600;
+        }
+        .whatsapp-btn:hover {
+            background: linear-gradient(145deg, #128C7E, #25D366);
+            transform: translateY(-3px); /* More pronounced lift */
+            box-shadow: 0 6px 15px rgba(37, 211, 102, 0.4);
+        }
+        .whatsapp-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(37, 211, 102, 0.1);
+        }
+
+        /* Logo effect - enhanced */
+        .logo-container {
+            position: relative;
+            display: inline-block;
+            border-radius: 50%;
+            padding: 8px; /* More padding for a larger glow */
+            background: linear-gradient(45deg, #007bff, #00d4ff); /* Brighter gradient for the frame */
+            box-shadow: 0 0 20px rgba(0, 123, 255, 0.5); /* Stronger initial glow */
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); /* Elegant animation */
+            animation: pulseGlow 2s infinite alternate; /* Pulsing glow animation */
+        }
+        .logo-container:hover {
+            box-shadow: 0 0 30px rgba(0, 123, 255, 0.8), 0 0 50px rgba(0, 123, 255, 0.3); /* Even stronger glow on hover */
+            transform: scale(1.05); /* More pronounced scale */
+            animation: none; /* Stop pulsing on hover */
+        }
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 20px rgba(0, 123, 255, 0.5); }
+            100% { box-shadow: 0 0 30px rgba(0, 123, 255, 0.7), 0 0 40px rgba(0, 123, 255, 0.2); }
+        }
+
+        /* PDF specific styles for better rendering */
+        .pdf-section-title {
+            font-size: 18px; /* Larger font for section titles */
+            font-weight: bold;
+            color: #004c99; /* Darker blue for titles */
+            margin-top: 15px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #cce7f5;
+            padding-bottom: 5px;
+        }
+        .pdf-data-label {
+            font-weight: bold;
+            color: #333;
+        }
+        .pdf-data-value {
+            color: #555;
+        }
+        .pdf-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+        .pdf-table th, .pdf-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: right;
+        }
+        .pdf-table th {
+            background-color: #f0f8ff;
+            color: #004c99;
+        }
+        .pdf-stamp-box {
+            border: 2px solid #007bff;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 20px;
+            background-color: rgba(240, 248, 255, 0.5);
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div id="app" class="container mx-auto max-w-2xl p-4 min-h-screen">
+        <header class="text-center mb-6">
+            <div class="logo-container mx-auto mb-4">
+                <!-- IMPORTANT: The provided URL is a Facebook page, not a direct image. -->
+                <!-- For the logo to display correctly, please replace 'https://placehold.co/...' with a direct image URL of your logo (e.g., ending in .png, .jpg, .svg). -->
+                <img src="https://placehold.co/128x128/007bff/ffffff?text=SABAN" alt="לוגו ח. סבן" class="w-32 h-32 object-contain rounded-full">
+            </div>
+            <h1 class="text-3xl font-bold text-slate-800">טופס תיעוד עבודה דיגיטלי</h1>
+            <p class="text-slate-600">ח. סבן - חומרי בנין 1994 בע"מ</p>
+        </header>
+
+        <div id="progress-bar" class="w-full mb-8">
+            <div class="flex items-center justify-between">
+                <div id="step-1" class="progress-step progress-step-active w-10 h-10 rounded-full flex items-center justify-center font-bold z-10">1</div>
+                <div class="progress-line flex-1"></div>
+                <div id="step-2" class="progress-step progress-step-inactive w-10 h-10 rounded-full flex items-center justify-center font-bold z-10">2</div>
+                <div class="progress-line flex-1"></div>
+                <div id="step-3" class="progress-step progress-step-inactive w-10 h-10 rounded-full flex items-center justify-center font-bold z-10">3</div>
+            </div>
+        </div>
+
+        <main>
+            <!-- Driver Messages Section -->
+            <div id="driver-messages" class="message-box hidden">
+                <p id="driver-message-text" class="font-semibold text-slate-700"></p>
+                <div id="driver-message-actions" class="mt-2 flex flex-wrap gap-2"></div>
+            </div>
+
+            <!-- Page 1: Order Details -->
+            <div id="page-1" class="form-section p-6 space-y-6 active-page">
+                <h2 class="text-2xl font-semibold text-slate-700 border-b pb-2">שלב 1: פרטי הזמנה</h2>
+                
+                <div id="existing-order-section">
+                    <div>
+                        <label for="driver-select" class="block mb-2 text-sm font-medium text-slate-700">בחר נהג/רכב:</label>
+                        <select id="driver-select" class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-50 focus:ring-blue-500 focus:border-blue-500">
+                            <option selected disabled>-- בחר שם --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="order-select" class="block mb-2 text-sm font-medium text-slate-700">בחר מספר הזמנה:</label>
+                        <select id="order-select" class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-50 focus:ring-blue-500 focus:border-blue-500" disabled>
+                            <option selected disabled>-- בחר הזמנה --</option>
+                        </select>
+                    </div>
+                    <div id="order-details-container" class="hidden space-y-4 pt-4 border-t">
+                        <h3 class="text-lg font-semibold text-slate-700">סיכום פרטי הזמנה</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><strong class="font-semibold text-slate-600">מספר הזמנה:</strong> <span id="order-id-display"></span></div>
+                            <div><strong class="font-semibold text-slate-600">תאריך:</strong> <span id="order-date-display"></span></div>
+                            <div><strong class="font-semibold text-slate-600">שם לקוח:</strong> <span id="customer-name-display"></span></div>
+                            <div><strong class="font-semibold text-slate-600">כתובת:</strong> <span id="customer-address-display"></span></div>
+                        </div>
+                        <div class="mt-4">
+                            <strong class="font-semibold text-slate-600">פירוט פריטים:</strong>
+                            <div class="mt-2 rounded-lg overflow-hidden shadow-sm">
+                                <table class="responsive-table w-full text-sm text-right text-slate-600">
+                                    <thead class="text-xs text-slate-700 uppercase">
+                                        <tr>
+                                            <th scope="col">מק"ט</th>
+                                            <th scope="col">תיאור</th>
+                                            <th scope="col">כמות</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="order-items-tbody">
+                                        <!-- Items will be populated here by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center my-4">
+                    <span class="text-slate-500">או</span>
+                </div>
+
+                <button type="button" id="start-new-order-btn" class="btn-primary px-4 py-2 rounded-lg font-semibold w-full">התחל הזמנה חדשה</button>
+
+                <div id="new-order-section" class="hidden space-y-4 pt-4 border-t">
+                    <h3 class="text-lg font-semibold text-slate-700">פרטי הזמנה חדשה</h3>
+                    <div>
+                        <label for="new-order-id-input" class="block mb-2 text-sm font-medium text-slate-700">מספר הזמנה:</label>
+                        <input type="text" id="new-order-id-input" class="w-full p-2.5 border border-slate-300 rounded-lg" placeholder="הזן מספר הזמנה">
+                    </div>
+                    <div>
+                        <label for="new-customer-name-input" class="block mb-2 text-sm font-medium text-slate-700">שם לקוח:</label>
+                        <input type="text" id="new-customer-name-input" class="w-full p-2.5 border border-slate-300 rounded-lg" placeholder="הזן שם לקוח">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="new-delivery-date-input" class="block mb-2 text-sm font-medium text-slate-700">תאריך אספקה:</label>
+                            <input type="date" id="new-delivery-date-input" class="w-full p-2.5 border border-slate-300 rounded-lg">
+                        </div>
+                        <div>
+                            <label for="new-delivery-time-input" class="block mb-2 text-sm font-medium text-slate-700">שעת אספקה:</label>
+                            <input type="time" id="new-delivery-time-input" class="w-full p-2.5 border border-slate-300 rounded-lg">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="site-access-select" class="block mb-2 text-sm font-medium text-slate-700">גישה לאתר:</label>
+                        <select id="site-access-select" class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-50 focus:ring-blue-500 focus:border-blue-500">
+                            <option selected disabled>-- בחר סוג גישה --</option>
+                            <option value="עבודת מנוף">עבודת מנוף</option>
+                            <option value="העברת ציוד">העברת ציוד</option>
+                            <option value="איסוף שק פסולת">איסוף שק פסולת</option>
+                        </select>
+                    </div>
+                    <button type="button" id="back-to-existing-order-btn" class="btn-secondary px-4 py-2 rounded-lg font-semibold w-full">חזור לבחירת הזמנה קיימת</button>
+                </div>
+            </div>
+
+            <!-- Page 2: Field Log -->
+            <div id="page-2" class="hidden form-section p-6 space-y-6">
+                <h2 class="text-2xl font-semibold text-slate-700 border-b pb-2">שלב 2: תיעוד אירועים בשטח</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="wait-start-time" class="block mb-2 text-sm font-medium text-slate-700">תחילת המתנה:</label>
+                        <input type="time" id="wait-start-time" class="w-full p-2.5 border border-slate-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label for="wait-end-time" class="block mb-2 text-sm font-medium text-slate-700">סיום המתנה:</label>
+                        <input type="time" id="wait-end-time" class="w-full p-2.5 border border-slate-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label for="crane-start-time" class="block mb-2 text-sm font-medium text-slate-700">תחילת עבודת מנוף:</label>
+                        <input type="time" id="crane-start-time" class="w-full p-2.5 border border-slate-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label for="crane-end-time" class="block mb-2 text-sm font-medium text-slate-700">סיום עבודת מנוף:</label>
+                        <input type="time" id="crane-end-time" class="w-full p-2.5 border border-slate-300 rounded-lg">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-lg font-bold text-blue-800">
+                    <div><strong class="font-semibold text-slate-600">סה"כ זמן המתנה:</strong> <span id="total-wait-time">0 דקות</span></div>
+                    <div><strong class="font-semibold text-slate-600">סה"כ זמן מנוף:</strong> <span id="total-crane-time">0 דקות</span></div>
+                </div>
+
+                <div>
+                    <label class="block mb-2 text-sm font-medium text-slate-700">סוג עבודת מנוף:</label>
+                    <div id="crane-work-type-group" class="flex flex-wrap gap-3">
+                        <button type="button" data-value="עבודה באתר הלקוח" class="btn-choice px-4 py-2 rounded-lg text-sm">🏗️ עבודה באתר הלקוח</button>
+                        <button type="button" data-value="העברה מאתר לאתר" class="btn-choice px-4 py-2 rounded-lg text-sm">🚚 העברה מאתר לאתר</button>
+                        <button type="button" data-value="איסוף שק פסולת" class="btn-choice px-4 py-2 rounded-lg text-sm">🗑️ איסוף שק פסולת</button>
+                    </div>
+                </div>
+                
+                <div class="border-t pt-4">
+                    <h3 class="text-lg font-semibold text-slate-700 mb-2">החזרות מלקוח:</h3>
+                    <div id="returns-container" class="space-y-3"></div>
+                    <button type="button" id="add-return-item-btn" class="mt-2 text-sm text-blue-600 font-semibold hover:text-blue-800">+ הוסף פריט להחזרה</button>
+                </div>
+                
+                <div class="border-t pt-4">
+                     <h3 class="text-lg font-semibold text-slate-700 mb-2">הערות וצילומים:</h3>
+                    <textarea id="driver-notes" rows="3" class="w-full p-2.5 border border-slate-300 rounded-lg" placeholder="כתוב כאן הערות חופשיות..."></textarea>
+                    <button type="button" id="open-camera-btn" class="mt-2 inline-flex items-center gap-2 btn-secondary px-4 py-2 rounded-lg text-sm">
+                        📸 צרף תמונה
+                    </button>
+                    <input type="file" id="camera-input" accept="image/*" capture="environment" class="hidden">
+                    <div id="image-previews" class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2"></div>
+                </div>
+            </div>
+
+            <!-- Page 3: Signature & Finish -->
+            <div id="page-3" class="hidden form-section p-6 space-y-6">
+                 <h2 class="text-2xl font-semibold text-slate-700 border-b pb-2">שלב 3: אישור וסיום</h2>
+                <div>
+                    <label for="receiver-name" class="block mb-2 text-sm font-medium text-slate-700">שם מקבל הסחורה / איש קשר:</label>
+                    <input type="text" id="receiver-name" class="w-full p-2.5 border border-slate-300 rounded-lg" placeholder="הקלד את שם המקבל">
+                </div>
+                <div>
+                    <label class="block mb-2 text-sm font-medium text-slate-700">חתימת לקוח:</label>
+                    <div class="w-full h-48 md:h-64 rounded-lg signature-pad-container shadow-inner p-2">
+                        <canvas id="signature-pad" class="w-full h-full bg-white/70 rounded"></canvas>
+                    </div>
+                    <button type="button" id="clear-signature-btn" class="mt-2 text-sm text-red-600 font-semibold hover:text-red-800">נקה חתימה</button>
+                </div>
+                <div class="border-t pt-4">
+                    <h3 class="text-lg font-semibold text-slate-700 mb-2">הודעות למחלקת סידור:</h3>
+                    <div class="flex flex-wrap gap-3">
+                        <button type="button" id="whatsapp-complete-btn" class="whatsapp-btn px-4 py-2 rounded-lg text-sm flex items-center gap-2">
+                            <i class="fab fa-whatsapp"></i> עדכן סיום פעולה
+                        </button>
+                        <button type="button" id="whatsapp-delay-btn" class="whatsapp-btn px-4 py-2 rounded-lg text-sm flex items-center gap-2">
+                            <i class="fab fa-whatsapp"></i> דווח על עיכוב
+                        </button>
+                        <button type="button" id="whatsapp-issue-btn" class="whatsapp-btn px-4 py-2 rounded-lg text-sm flex items-center gap-2">
+                            <i class="fab fa-whatsapp"></i> דווח על בעיה
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div id="navigation-controls" class="mt-8 flex justify-between items-center">
+                <button type="button" id="back-btn" class="btn-secondary px-6 py-2 rounded-lg font-semibold" disabled>חזרה</button>
+                <button type="button" id="next-btn" class="btn-primary px-6 py-2 rounded-lg font-semibold">הבא</button>
+                <button type="button" id="submit-btn" class="hidden btn-primary bg-green-600 hover:bg-green-700 px-6 py-2 rounded-lg font-bold">שלח וסיים</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="transfer-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md space-y-4 modal-content">
+            <h3 class="text-xl font-semibold">פרטי העברה מאתר לאתר</h3>
+            <div>
+                <label for="transfer-from" class="block mb-2 text-sm font-medium text-slate-700">העברה מאתר (כתובת נוכחית):</label>
+                <input type="text" id="transfer-from" class="w-full p-2.5 border border-slate-300 rounded-lg">
+            </div>
+            <div>
+                <label for="transfer-to" class="block mb-2 text-sm font-medium text-slate-700">אל אתר (כתובת יעד):</label>
+                <input type="text" id="transfer-to" class="w-full p-2.5 border border-slate-300 rounded-lg">
+            </div>
+            <div class="flex justify-end gap-3">
+                <button id="cancel-transfer-btn" type="button" class="btn-secondary px-4 py-2 rounded-lg text-sm">ביטול</button>
+                <button id="confirm-transfer-btn" type="button" class="btn-primary px-4 py-2 rounded-lg text-sm">אישור</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="confirmation-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-md text-center space-y-4 modal-content">
+             <div class="text-6xl">✅</div>
+            <h3 class="text-2xl font-bold">הטופס נשלח בהצלחה!</h3>
+            <p class="text-slate-600">קובץ PDF נוצר ונשמר. הנתונים עודכנו במערכת. ניתן לסגור את החלון.</p>
+            <div class="pt-4">
+                 <button id="close-confirmation-btn" type="button" class="btn-primary w-full px-6 py-2 rounded-lg font-semibold">סגור</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Message Display (for app-wide messages like location updates) -->
+    <div id="app-message" class="fixed top-4 left-1/2 -translate-x-1/2 bg-blue-100 text-blue-800 p-3 rounded-lg shadow-md z-50 hidden transition-opacity duration-300" role="alert">
+        <p id="app-message-text" class="font-semibold text-center"></p>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const MOCK_DATA = {
+                drivers: [
+                    { name: 'שאול', vehicle: '61541002' },
+                    { name: 'חכמת', vehicle: '61541002' },
+                    { name: 'פאלח הובלות עוביידה', vehicle: '97-405-86' },
+                    { name: 'עלאא', vehicle: '' },
+                    { name: 'יואב', vehicle: '47818801' },
+                    { name: 'עלי', vehicle: '65151701' },
+                    { name: 'אוסייד', vehicle: '63-511-31' },
+                    { name: 'ניסים מגידיש', vehicle: '' },
+                ],
+                orders: [
+                    { id: '6207015', customer: 'ישראל ישראלי', address: 'התלמיד 6, הוד השרון', items: [{sku: '101', desc: 'משטח בלוקים', qty: 2}, {sku: '205', desc: 'שק מלט', qty: 10}] },
+                    { id: '6207018', customer: 'משה כהן', address: 'זבוטינסקי 15, תל אביב', items: [{sku: '310', desc: 'חבית פקדון', qty: 1}, {sku: '402', desc: 'משטח סבן', qty: 3}] },
+                    { id: '6207021', customer: 'דוד לוי', address: 'הנשיא 1, רעננה', items: [{sku: '101', desc: 'משטח בלוקים', qty: 5}] }
+                ],
+                returnableItems: ["שק פקדון", "משטח סבן", "משטח בלוקים", "חבית פקדון", "שק פסולת"]
+            };
+
+            const WHATSAPP_DISPATCH_NUMBER = '972508860896'; // מספר וואטסאפ למחלקת סידור
+
+            const state = {
+                currentPage: 1,
+                isNewOrderMode: false,
+                formData: {
+                    driver: null,
+                    vehicle: null,
+                    orderId: null,
+                    customerName: null,
+                    customerAddress: null,
+                    items: [], 
+                    
+                    newOrderId: null,
+                    newCustomerName: null,
+                    newDeliveryDate: null,
+                    newDeliveryTime: null,
+                    siteAccessType: null,
+
+                    waitStartTime: null,
+                    waitEndTime: null,
+                    craneStartTime: null,
+                    craneEndTime: null,
+                    craneWorkType: null,
+                    transferFrom: null,
+                    transferTo: null,
+                    returns: [],
+                    notes: '',
+                    images: [],
+                    receiverName: null,
+                    signature: null,
+                    location: null, // Will store {lat, lon, timestamp}
+                    serialNumber: `SBN-${Date.now()}`,
+                    totalWaitMinutes: 0, // Added for calculations
+                    totalCraneMinutes: 0 // Added for calculations
+                },
+                driverMessageTimeout: null // For clearing driver messages
+            };
+
+            const pages = [document.getElementById('page-1'), document.getElementById('page-2'), document.getElementById('page-3')];
+            const steps = [document.getElementById('step-1'), document.getElementById('step-2'), document.getElementById('step-3')];
+            const backBtn = document.getElementById('back-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const submitBtn = document.getElementById('submit-btn');
+
+            const driverSelect = document.getElementById('driver-select');
+            const orderSelect = document.getElementById('order-select');
+            const existingOrderSection = document.getElementById('existing-order-section');
+            const startNewOrderBtn = document.getElementById('start-new-order-btn');
+            const newOrderSection = document.getElementById('new-order-section');
+            const backToExistingOrderBtn = document.getElementById('back-to-existing-order-btn');
+
+            const newOrderIdInput = document.getElementById('new-order-id-input');
+            const newCustomerNameInput = document.getElementById('new-customer-name-input');
+            const newDeliveryDateInput = document.getElementById('new-delivery-date-input');
+            const newDeliveryTimeInput = document.getElementById('new-delivery-time-input');
+            const siteAccessSelect = document.getElementById('site-access-select');
+            const orderDetailsContainer = document.getElementById('order-details-container');
+
+            const totalWaitTimeDisplay = document.getElementById('total-wait-time');
+            const totalCraneTimeDisplay = document.getElementById('total-crane-time');
+
+            const driverMessagesContainer = document.getElementById('driver-messages');
+            const driverMessageText = document.getElementById('driver-message-text');
+            const driverMessageActions = document.getElementById('driver-message-actions');
+
+
+            let signaturePad = null;
+
+            function initialize() {
+                populateDrivers();
+                setupEventListeners();
+                parseUrlParams(); // Check for orderId/driverName in URL
+                updatePage(); // This is crucial for showing the first page
+                requestLocation(); // Initial location request
+            }
+
+            function parseUrlParams() {
+                const params = new URLSearchParams(window.location.search);
+                const orderIdParam = params.get('orderId');
+                const driverNameParam = params.get('driverName');
+
+                if (orderIdParam && driverNameParam) {
+                    state.formData.orderId = orderIdParam;
+                    state.formData.driver = driverNameParam;
+
+                    // Try to find the driver in MOCK_DATA
+                    const selectedDriver = MOCK_DATA.drivers.find(d => d.name === driverNameParam);
+                    if (selectedDriver) {
+                        state.formData.vehicle = selectedDriver.vehicle;
+                        driverSelect.value = selectedDriver.name; // Set dropdown
+                        populateOrders();
+                        // Find and select the order
+                        const selectedOrder = MOCK_DATA.orders.find(o => o.id === orderIdParam);
+                        if (selectedOrder) {
+                            orderSelect.value = selectedOrder.id; // Set dropdown
+                            state.formData.customerName = selectedOrder.customer;
+                            state.formData.customerAddress = selectedOrder.address;
+                            state.formData.items = selectedOrder.items;
+
+                            document.getElementById('order-details-container').classList.remove('hidden');
+                            document.getElementById('order-id-display').textContent = selectedOrder.id;
+                            document.getElementById('order-date-display').textContent = new Date().toLocaleDateString('he-IL');
+                            document.getElementById('customer-name-display').textContent = selectedOrder.customer;
+                            document.getElementById('customer-address-display').textContent = selectedOrder.address;
+                            
+                            const tbody = document.getElementById('order-items-tbody');
+                            tbody.innerHTML = '';
+                            selectedOrder.items.forEach(item => {
+                                tbody.innerHTML += `
+                                    <tr class="bg-white border-b">
+                                        <td class="px-6 py-4">${item.sku}</td>
+                                        <td class="px-6 py-4">${item.desc}</td>
+                                        <td class="px-6 py-4">${item.qty}</td>
+                                    </tr>
+                                `;
+                            });
+                            showAppMessage(`הזמנה מספר ${state.formData.orderId} נטענה אוטומטית עבור ${state.formData.driver}.`, 'success');
+                        } else {
+                            showAppMessage('מספר הזמנה לא נמצא במערכת. אנא בחר הזמנה ידנית.', 'error');
+                        }
+                    } else {
+                        showAppMessage('שם הנהג לא נמצא במערכת. אנא בחר נהג ידנית.', 'error');
+                    }
+                }
+            }
+
+            function populateDrivers() {
+                MOCK_DATA.drivers.forEach(driver => {
+                    const option = document.createElement('option');
+                    option.value = driver.name;
+                    option.textContent = `${driver.name}${driver.vehicle ? ` (${driver.vehicle})` : ''}`;
+                    driverSelect.appendChild(option);
+                });
+            }
+
+            function populateOrders() {
+                orderSelect.innerHTML = '<option selected disabled>-- בחר הזמנה --</option>';
+                MOCK_DATA.orders.forEach(order => {
+                     const option = document.createElement('option');
+                    option.value = order.id;
+                    option.textContent = `הזמנה ${order.id} - ${order.customer}`;
+                    orderSelect.appendChild(option);
+                });
+                orderSelect.disabled = false;
+            }
+
+            function updatePage() {
+                pages.forEach((page, index) => {
+                    const isCurrentPage = index + 1 === state.currentPage;
+                    page.classList.toggle('hidden', !isCurrentPage);
+                    page.classList.toggle('active-page', isCurrentPage);
+                    if (isCurrentPage && page.id === 'page-3') {
+                        setTimeout(() => {
+                            const canvas = document.getElementById('signature-pad');
+                            if (!signaturePad) {
+                                signaturePad = new SignaturePad(canvas);
+                            }
+                            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                            canvas.width = canvas.offsetWidth * ratio;
+                            canvas.height = canvas.offsetHeight * ratio;
+                            canvas.getContext("2d").scale(ratio, ratio);
+                            signaturePad.clear();
+                            if (state.formData.signature) {
+                                signaturePad.fromDataURL(state.formData.signature);
+                            }
+                        }, 100);
+                    }
+                });
+                steps.forEach((step, index) => {
+                    step.classList.toggle('progress-step-active', index < state.currentPage);
+                    step.classList.toggle('progress-step-inactive', index >= state.currentPage);
+                });
+
+                backBtn.disabled = state.currentPage === 1;
+                nextBtn.classList.toggle('hidden', state.currentPage === 3);
+                submitBtn.classList.toggle('hidden', state.currentPage !== 3);
+
+                // Update calculated times on page 2
+                if (state.currentPage === 2) {
+                    calculateAndDisplayTimes();
+                    checkDriverPerformance(); // Check and display messages
+                } else {
+                    hideDriverMessage(); // Hide messages when not on page 2
+                }
+
+                if (state.currentPage === 1 && state.formData.driver) {
+                    showAppMessage(`ברוך הבא, ${state.formData.driver}! אנא בחר הזמנה או התחל חדשה.`, 'info');
+                } else if (state.currentPage === 2 && state.formData.driver) {
+                    const progressPercentage = Math.floor((state.currentPage / pages.length) * 100);
+                    showAppMessage(`כל הכבוד ${state.formData.driver}, עברת ${progressPercentage}% מהטופס!`, 'success');
+                } else if (state.currentPage === 3 && state.formData.driver) {
+                     showAppMessage(`כמעט סיימת, ${state.formData.driver}! אנא קבל חתימה מהלקוח.`, 'info');
+                }
+            }
+            
+            function showAppMessage(message, type = 'info') {
+                const messageDiv = document.getElementById('app-message');
+                const messageText = document.getElementById('app-message-text');
+                messageText.textContent = message;
+
+                messageDiv.className = 'fixed top-4 left-1/2 -translate-x-1/2 p-3 rounded-lg shadow-md z-50 transition-opacity duration-300';
+                if (type === 'success') {
+                    messageDiv.classList.add('bg-green-100', 'text-green-800');
+                } else if (type === 'error') {
+                    messageDiv.classList.add('bg-red-100', 'text-red-800');
+                } else {
+                    messageDiv.classList.add('bg-blue-100', 'text-blue-800');
+                }
+
+                messageDiv.classList.remove('hidden');
+                messageDiv.style.opacity = '1';
+
+                setTimeout(() => {
+                    messageDiv.style.opacity = '0';
+                    setTimeout(() => messageDiv.classList.add('hidden'), 300);
+                }, 5000);
+            }
+
+            function showDriverMessage(message, type = 'info', actions = []) {
+                clearTimeout(state.driverMessageTimeout); // Clear any existing timeout
+                driverMessagesContainer.classList.remove('hidden', 'error');
+                driverMessageText.textContent = message;
+                driverMessageActions.innerHTML = ''; // Clear previous actions
+
+                if (type === 'error') {
+                    driverMessagesContainer.classList.add('error');
+                }
+
+                actions.forEach(action => {
+                    const button = document.createElement('button');
+                    button.textContent = action.text;
+                    button.className = `whatsapp-btn px-4 py-2 rounded-lg text-sm flex items-center gap-2`;
+                    button.innerHTML = `<i class="fab fa-whatsapp"></i> ${action.text}`;
+                    button.onclick = () => sendWhatsAppMessage(action.message);
+                    driverMessageActions.appendChild(button);
+                });
+
+                // Set a timeout to hide the message after a few seconds if no actions are present
+                if (actions.length === 0) {
+                    state.driverMessageTimeout = setTimeout(() => {
+                        hideDriverMessage();
+                    }, 10000); // Hide after 10 seconds if no actions
+                }
+            }
+
+            function hideDriverMessage() {
+                driverMessagesContainer.classList.add('hidden');
+                driverMessageText.textContent = '';
+                driverMessageActions.innerHTML = '';
+            }
+
+            function calculateTimeDifference(startTime, endTime) {
+                if (!startTime || !endTime) return 0;
+                const start = new Date(`2000/01/01 ${startTime}`);
+                const end = new Date(`2000/01/01 ${endTime}`);
+                const diffMs = end - start;
+                return Math.max(0, Math.round(diffMs / (1000 * 60))); // Difference in minutes
+            }
+
+            function calculateAndDisplayTimes() {
+                const waitStart = document.getElementById('wait-start-time').value;
+                const waitEnd = document.getElementById('wait-end-time').value;
+                const craneStart = document.getElementById('crane-start-time').value;
+                const craneEnd = document.getElementById('crane-end-time').value;
+
+                const totalWaitMinutes = calculateTimeDifference(waitStart, waitEnd);
+                const totalCraneMinutes = calculateTimeDifference(craneStart, craneEnd);
+
+                totalWaitTimeDisplay.textContent = `${totalWaitMinutes} דקות`;
+                totalCraneTimeDisplay.textContent = `${totalCraneMinutes} דקות`;
+
+                state.formData.totalWaitMinutes = totalWaitMinutes;
+                state.formData.totalCraneMinutes = totalCraneMinutes;
+            }
+
+            function checkDriverPerformance() {
+                const driverName = state.formData.driver || 'נהג יקר';
+                const totalWaitMinutes = state.formData.totalWaitMinutes || 0;
+                const totalCraneMinutes = state.formData.totalCraneMinutes || 0;
+
+                // Check for excessive wait time
+                if (totalWaitMinutes > 50) {
+                    showDriverMessage(
+                        `דווח, ${driverName}: שעות המתנה/עיכוב מעל 50 דקות! האם מחלקת סידור מודעת על עיכוב רציני?`,
+                        'error',
+                        [{ text: 'עדכן מחלקת סידור', message: `עיכוב רציני בהזמנה ${state.formData.orderId || state.formData.newOrderId} עבור ${driverName}. זמן המתנה: ${totalWaitMinutes} דקות. אנא בדוק.` }]
+                    );
+                    return;
+                }
+
+                // Check for illogical crane/wait times (simple example)
+                if (totalCraneMinutes > 0 && totalWaitMinutes > totalCraneMinutes * 2) { // If wait time is more than double crane time
+                    showDriverMessage(
+                        `${driverName}, לא הגיוני שעות פריקה לא מדויקות! זמן המתנה (${totalWaitMinutes} דקות) ארוך משמעותית מזמן המנוף (${totalCraneMinutes} דקות). אנא בדוק שוב.`,
+                        'error',
+                        [{ text: 'יש בעיה בשעות', message: `יש בעיה בשעות שהוזנו בהזמנה ${state.formData.orderId || state.formData.newOrderId} על ידי ${driverName}. אנא בדוק.` }]
+                    );
+                    return;
+                }
+
+                // General encouragement
+                if (state.currentPage === 2 && driverName) {
+                    showDriverMessage(`כל הכבוד, ${driverName}! המשך בעבודה מצוינת!`);
+                }
+            }
+
+
+            function sendWhatsAppMessage(message) {
+                const encodedMessage = encodeURIComponent(message);
+                const whatsappUrl = `https://wa.me/${WHATSAPP_DISPATCH_NUMBER}?text=${encodedMessage}`;
+                window.open(whatsappUrl, '_blank');
+            }
+
+            function saveFormData() {
+                state.formData.waitStartTime = document.getElementById('wait-start-time').value;
+                state.formData.waitEndTime = document.getElementById('wait-end-time').value;
+                state.formData.craneStartTime = document.getElementById('crane-start-time').value;
+                state.formData.craneEndTime = document.getElementById('crane-end-time').value;
+                state.formData.notes = document.getElementById('driver-notes').value;
+                state.formData.receiverName = document.getElementById('receiver-name').value;
+                
+                if (signaturePad && !signaturePad.isEmpty()) {
+                    state.formData.signature = signaturePad.toDataURL();
+                } else {
+                    state.formData.signature = null;
+                }
+
+                if (state.isNewOrderMode) {
+                    state.formData.orderId = newOrderIdInput.value; // Use this for PDF naming
+                    state.formData.customerName = newCustomerNameInput.value; // Use this for PDF
+                    state.formData.newOrderId = newOrderIdInput.value;
+                    state.formData.newCustomerName = newCustomerNameInput.value;
+                    state.formData.newDeliveryDate = newDeliveryDateInput.value;
+                    state.formData.newDeliveryTime = newDeliveryTimeInput.value;
+                    state.formData.siteAccessType = siteAccessSelect.value;
+                }
+
+                // Ensure calculated times are saved
+                calculateAndDisplayTimes();
+            }
+            
+            function handleNavigation(direction) {
+                 if (direction === 'next' && state.currentPage < 3) {
+                     if(validatePage()) {
+                        saveFormData();
+                        state.currentPage++;
+                     }
+                } else if (direction === 'back' && state.currentPage > 1) {
+                    saveFormData();
+                    state.currentPage--;
+                }
+                updatePage();
+            }
+            
+            function validatePage() {
+                if(state.currentPage === 1) {
+                    if (state.isNewOrderMode) {
+                        if (!newOrderIdInput.value.trim() || !newCustomerNameInput.value.trim() || !newDeliveryDateInput.value || !newDeliveryTimeInput.value || siteAccessSelect.value === '-- בחר סוג גישה --') {
+                            showAppMessage('אנא מלא את כל פרטי ההזמנה החדשה.', 'error');
+                            return false;
+                        }
+                    } else {
+                        if(!state.formData.orderId) {
+                            showAppMessage('יש לבחור הזמנה לפני המעבר לשלב הבא.', 'error');
+                            return false;
+                        }
+                    }
+                }
+                if(state.currentPage === 3) {
+                     if(document.getElementById('receiver-name').value.trim() === '') {
+                        showAppMessage('יש להזין את שם מקבל הסחורה.', 'error');
+                        return false;
+                    }
+                    if(signaturePad && signaturePad.isEmpty()) {
+                        showAppMessage('יש לחתום לפני השליחה.', 'error');
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            function addReturnItem() {
+                const returnId = `return-${Date.now()}`;
+                const container = document.createElement('div');
+                container.id = returnId;
+                container.className = 'flex items-center gap-2';
+
+                const select = document.createElement('select');
+                select.className = 'w-2/3 p-2 border border-slate-300 rounded-lg bg-slate-50 return-item-select';
+                select.innerHTML = '<option disabled selected>בחר פריט...</option>';
+                MOCK_DATA.returnableItems.forEach(item => {
+                    select.innerHTML += `<option value="${item}">${item}</option>`;
+                });
+
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.min = 1;
+                input.placeholder = 'כמות';
+                input.className = 'w-1/3 p-2 border border-slate-300 rounded-lg return-item-qty';
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = '❌';
+                removeBtn.className = 'text-sm';
+                removeBtn.onclick = () => {
+                    document.getElementById(returnId).remove();
+                    state.formData.returns = state.formData.returns.filter(r => r.id !== returnId);
+                };
+                
+                container.append(select, input, removeBtn);
+                document.getElementById('returns-container').appendChild(container);
+
+                const returnObject = { id: returnId, item: '', qty: 0 };
+                state.formData.returns.push(returnObject);
+                select.onchange = (e) => returnObject.item = e.target.value;
+                input.onchange = (e) => returnObject.qty = e.target.value;
+            }
+
+            function requestLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            state.formData.location = {
+                                lat: position.coords.latitude,
+                                lon: position.coords.longitude,
+                                timestamp: new Date().toISOString()
+                            };
+                            showAppMessage(`מיקום נהג תועד: קו רוחב ${position.coords.latitude.toFixed(4)}, קו אורך ${position.coords.longitude.toFixed(4)}`, 'success');
+                        },
+                        (error) => { 
+                            state.formData.location = "Unavailable";
+                            showAppMessage(`שגיאת מיקום: ${error.message}. אנא וודא שהרשאת מיקום מופעלת.`, 'error');
+                        },
+                        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                    );
+                } else {
+                     state.formData.location = "Not supported";
+                     showAppMessage('שירותי מיקום אינם נתמכים בדפדפן זה.', 'error');
+                }
+            }
+            
+            async function handleSubmit() {
+                if (!validatePage()) return;
+                saveFormData();
+                
+                // Re-request location just before submission for accuracy
+                requestLocation(); 
+                
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'p',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+                
+                const pdfTemplate = document.createElement('div');
+                pdfTemplate.style.width = '210mm';
+                pdfTemplate.style.padding = '15mm';
+                pdfTemplate.style.fontFamily = 'Assistant, sans-serif';
+                pdfTemplate.style.direction = 'rtl';
+
+                const orderIdToDisplay = state.isNewOrderMode ? state.formData.newOrderId : state.formData.orderId;
+                const customerNameToDisplay = state.isNewOrderMode ? state.formData.newCustomerName : state.formData.customerName;
+                const deliveryDateToDisplay = state.isNewOrderMode ? new Date(state.formData.newDeliveryDate).toLocaleDateString('he-IL') : (state.formData.orderDate || new Date().toLocaleDateString('he-IL'));
+                const deliveryTimeToDisplay = state.isNewOrderMode ? state.formData.newDeliveryTime : (state.formData.orderTime || 'לא צוין');
+                const customerAddressToDisplay = state.isNewOrderMode ? 'לא צוין' : state.formData.customerAddress;
+                const siteAccessTypeToDisplay = state.isNewOrderMode ? state.formData.siteAccessType : 'לא צוין';
+
+                const locationDisplay = state.formData.location && state.formData.location.lat ? 
+                    `קו רוחב ${state.formData.location.lat.toFixed(4)}, קו אורך ${state.formData.location.lon.toFixed(4)}` : 
+                    `מיקום לא זמין`;
+
+                // Build the PDF content with enhanced styling and tables
+                let pdfContentHtml = `
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #004c99; padding-bottom: 10px; margin-bottom: 15px;">
+                        <img src="${document.querySelector('header img').src}" style="width: 35mm; height: 35mm; object-fit: contain;">
+                        <div style="text-align: left; color: #004c99;">
+                            <h1 style="font-size: 28px; font-weight: bold; margin: 0;">ח. סבן - חומרי בנין 1994 בע"מ</h1>
+                            <p style="margin: 2px 0; font-size: 14px;">ח.פ: 512001678 | התלמיד 6, הוד השרון</p>
+                        </div>
+                    </div>
+                    <h2 style="text-align: center; font-size: 26px; font-weight: bold; margin: 20px 0; text-decoration: underline; color: #007bff;">תעודת עבודה / משלוח</h2>
+                    <p style="text-align: left; font-size: 14px; margin-bottom: 5px;"><strong class="pdf-data-label">מספר אסמכתא:</strong> <span class="pdf-data-value">${state.formData.serialNumber}</span></p>
+                    <p style="text-align: left; font-size: 14px; margin-bottom: 15px;"><strong class="pdf-data-label">תאריך הפקה:</strong> <span class="pdf-data-value">${new Date().toLocaleDateString('he-IL')}</span></p>
+                    
+                    <div style="border: 1px solid #cce7f5; padding: 15px; border-radius: 10px; margin-bottom: 20px; background-color: rgba(240, 248, 255, 0.5);">
+                        <h3 class="pdf-section-title">פרטי הזמנה</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;">
+                            <div><strong class="pdf-data-label">שם נהג:</strong> <span class="pdf-data-value">${state.formData.driver} (${state.formData.vehicle || 'לא צוין רכב'})</span></div>
+                            <div><strong class="pdf-data-label">מס' הזמנה:</strong> <span class="pdf-data-value">${orderIdToDisplay || 'לא צוין'}</span></div>
+                            <div><strong class="pdf-data-label">שם לקוח:</strong> <span class="pdf-data-value">${customerNameToDisplay || 'לא צוין'}</span></div>
+                            <div><strong class="pdf-data-label">כתובת:</strong> <span class="pdf-data-value">${customerAddressToDisplay || 'לא צוין'}</span></div>
+                            <div><strong class="pdf-data-label">תאריך אספקה:</strong> <span class="pdf-data-value">${deliveryDateToDisplay || 'לא צוין'}</span></div>
+                            <div><strong class="pdf-data-label">שעת אספקה:</strong> <span class="pdf-data-value">${deliveryTimeToDisplay || 'לא צוין'}</span></div>
+                            <div><strong class="pdf-data-label">גישה לאתר:</strong> <span class="pdf-data-value">${siteAccessTypeToDisplay || 'לא צוין'}</span></div>
+                        </div>
+                    </div>
+
+                    <div style="border: 1px solid #cce7f5; padding: 15px; border-radius: 10px; margin-bottom: 20px; background-color: rgba(240, 248, 255, 0.5);">
+                        <h3 class="pdf-section-title">תיעוד זמנים</h3>
+                        <table class="pdf-table">
+                            <thead>
+                                <tr>
+                                    <th>פעולה</th>
+                                    <th>תחילת</th>
+                                    <th>סיום</th>
+                                    <th>סה"כ (דקות)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>זמן המתנה</td>
+                                    <td>${state.formData.waitStartTime || 'לא צוין'}</td>
+                                    <td>${state.formData.waitEndTime || 'לא צוין'}</td>
+                                    <td>${state.formData.totalWaitMinutes || 0}</td>
+                                </tr>
+                                <tr>
+                                    <td>זמן מנוף</td>
+                                    <td>${state.formData.craneStartTime || 'לא צוין'}</td>
+                                    <td>${state.formData.craneEndTime || 'לא צוין'}</td>
+                                    <td>${state.formData.totalCraneMinutes || 0}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="border: 1px solid #cce7f5; padding: 15px; border-radius: 10px; margin-bottom: 20px; background-color: rgba(240, 248, 255, 0.5);">
+                        <h3 class="pdf-section-title">פרטי עבודה והחזרות</h3>
+                        <p style="font-size: 14px; margin-bottom: 10px;"><strong class="pdf-data-label">סוג עבודת מנוף:</strong> <span class="pdf-data-value">${state.formData.craneWorkType || 'לא צוין'}</span></p>
+                        ${state.formData.craneWorkType === 'העברה מאתר לאתר' ? `<p style="font-size: 14px;"><strong class="pdf-data-label">העברה מ:</strong> <span class="pdf-data-value">${state.formData.transferFrom || 'לא צוין'}</span><br><strong class="pdf-data-label">אל:</strong> <span class="pdf-data-value">${state.formData.transferTo || 'לא צוין'}</span></p>` : ''}
+                        
+                        ${state.formData.returns.filter(r=>r.item).length > 0 ? `
+                            <h4 style="font-size: 16px; font-weight: bold; margin-top: 15px; margin-bottom: 5px; color: #004c99;">החזרות:</h4>
+                            <table class="pdf-table">
+                                <thead>
+                                    <tr>
+                                        <th>פריט</th>
+                                        <th>כמות</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${state.formData.returns.filter(r=>r.item).map(r => `<tr><td>${r.item}</td><td>${r.qty}</td></tr>`).join('')}
+                                </tbody>
+                            </table>
+                        ` : ''}
+                        
+                        ${state.formData.notes ? `<h4 style="font-size: 16px; font-weight: bold; margin-top: 15px; margin-bottom: 5px; color: #004c99;">הערות נהג:</h4><p style="border: 1px solid #cce7f5; padding: 10px; border-radius: 5px; font-size: 14px; background-color: rgba(255, 255, 255, 0.8);">${state.formData.notes}</p>` : ''}
+                    </div>
+
+                    <div class="pdf-stamp-box">
+                        <h4 style="font-size: 16px; font-weight: bold; text-align: center; margin-bottom: 10px; color: #004c99;">חותמת דיגיטלית</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 12px;">
+                            <div><strong class="pdf-data-label">שם נהג:</strong> <span class="pdf-data-value">${state.formData.driver || 'לא צוין'}</span></div>
+                            <div><strong class="pdf-data-label">שם לקוח:</strong> <span class="pdf-data-value">${customerNameToDisplay || 'לא צוין'}</span></div>
+                            <div style="grid-column: 1 / span 2;"><strong class="pdf-data-label">כתובת:</strong> <span class="pdf-data-value">${customerAddressToDisplay || 'לא צוין'}</span></div>
+                            <div style="grid-column: 1 / span 2;"><strong class="pdf-data-label">מיקום:</strong> <span class="pdf-data-value">${locationDisplay}</span></div>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 20px;">
+                        <h4 style="font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #004c99;">אישור קבלת שירות / סחורה</h4>
+                        <p style="font-size: 14px; margin-bottom: 15px;">אני הח"מ, <strong class="pdf-data-value">${state.formData.receiverName || 'לא צוין'}</strong>, מאשר קבלת השירות/הסחורה.</p>
+                        <div style="width: 100mm; height: 50mm; margin: 0 auto; border-bottom: 1px solid #333; display: flex; justify-content: center; align-items: center;">
+                            ${state.formData.signature ? `<img src="${state.formData.signature}" style="max-width: 90%; max-height: 90%; object-fit: contain;">` : `<p style="font-size: 12px; color: #777;">אין חתימה</p>`}
+                        </div>
+                        <p style="font-size: 12px; margin-top: 5px; color: #555;">חתימת הלקוח</p>
+                    </div>
+                `;
+                
+                pdfTemplate.innerHTML = pdfContentHtml; // Set the generated HTML to the temporary div
+                document.body.appendChild(pdfTemplate); // Append to body for html2canvas to render
+
+                // Capture the content as an image
+                const pdfCanvas = await html2canvas(pdfTemplate, { scale: 2, useCORS: true, logging: false });
+                const pdfDataURL = pdfCanvas.toDataURL('image/jpeg', 0.9); // Use JPEG for smaller file size, 0.9 quality
+
+                // Add the captured image to jspdf
+                const imgProps = pdf.getImageProperties(pdfDataURL);
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                
+                let currentY = 0;
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                const imgRatio = imgProps.height / imgProps.width;
+
+                // Split image into pages if too long
+                let imgHeight = pdfWidth * imgRatio;
+                let heightLeft = imgHeight;
+
+                let position = 0;
+
+                pdf.addImage(pdfDataURL, 'JPEG', 0, position, pdfWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft >= -10) { // Allow slight overlap to prevent gaps
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(pdfDataURL, 'JPEG', 0, position, pdfWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                
+                // Add images to PDF on new pages
+                if (state.formData.images.length > 0) {
+                    state.formData.images.forEach((imgSrc, index) => {
+                        pdf.addPage();
+                        pdf.setFontSize(16);
+                        pdf.text(`תמונה מצורפת ${index + 1}`, pdfWidth / 2, 20, { align: 'center' });
+                        const imgWidth = 150; // Fixed width for images
+                        const imgHeight = (pdf.getImageProperties(imgSrc).height * imgWidth) / pdf.getImageProperties(imgSrc).width;
+                        pdf.addImage(imgSrc, 'JPEG', (pdfWidth - imgWidth) / 2, 30, imgWidth, imgHeight);
+                    });
+                }
+                
+                const finalPdfData = pdf.output('datauristring'); // Get PDF as data URI string
+
+                // Trigger PDF download
+                pdf.save(`Saban_Report_${orderIdToDisplay || state.formData.serialNumber}.pdf`);
+
+                // Prepare data for Apps Script
+                const dataToSend = {
+                    formData: state.formData,
+                    pdfData: finalPdfData,
+                    imageData: state.formData.images // Array of base64 image data
+                };
+
+                // Send data to Google Apps Script Web App
+                const appsScriptWebAppUrl = 'https://script.google.com/macros/s/AKfycbxcM27A_uhxxlYFOo1tKUSYrfaptDb6f6ZAbqwOb93j3Ux5nkWgLMrPy548ps8Q1necJQ/exec'; // Replace with your deployed Apps Script URL
+                console.log('Sending data to Apps Script URL:', appsScriptWebAppUrl); // Added for debugging
+                try {
+                    const response = await fetch(appsScriptWebAppUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(dataToSend),
+                    });
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        showAppMessage('הטופס נשלח בהצלחה למערכת!', 'success');
+                        document.getElementById('confirmation-modal').classList.remove('hidden');
+                        document.getElementById('confirmation-modal').querySelector('.modal-content').classList.add('show');
+                    } else {
+                        showAppMessage(`שגיאה בשליחה: ${result.message}`, 'error');
+                    }
+                } catch (error) {
+                    showAppMessage(`שגיאה בתקשורת עם השרת: ${error.message}`, 'error');
+                }
+                
+                document.body.removeChild(pdfTemplate); // Clean up the temporary div
+            }
+
+
+            function setupEventListeners() {
+                backBtn.addEventListener('click', () => handleNavigation('back'));
+                nextBtn.addEventListener('click', () => handleNavigation('next'));
+                submitBtn.addEventListener('click', handleSubmit);
+                
+                startNewOrderBtn.addEventListener('click', () => {
+                    state.isNewOrderMode = true;
+                    state.formData.orderId = null;
+                    state.formData.customerName = null;
+                    state.formData.customerAddress = null;
+                    state.formData.items = [];
+                    newOrderIdInput.value = '';
+                    newCustomerNameInput.value = '';
+                    newDeliveryDateInput.value = '';
+                    newDeliveryTimeInput.value = '';
+                    siteAccessSelect.value = '-- בחר סוג גישה --';
+                    orderDetailsContainer.classList.add('hidden');
+                    updatePage();
+                });
+
+                backToExistingOrderBtn.addEventListener('click', () => {
+                    state.isNewOrderMode = false;
+                    state.formData.newOrderId = null;
+                    state.formData.newCustomerName = null;
+                    state.formData.newDeliveryDate = null;
+                    state.formData.newDeliveryTime = null;
+                    state.formData.siteAccessType = null;
+                    updatePage();
+                });
+
+
+                driverSelect.addEventListener('change', (e) => {
+                    const selectedDriver = MOCK_DATA.drivers.find(d => d.name === e.target.value);
+                    if (selectedDriver) {
+                        state.formData.driver = selectedDriver.name;
+                        state.formData.vehicle = selectedDriver.vehicle;
+                        populateOrders();
+                        showAppMessage(`שלום ${state.formData.driver}, ברוך הבא למערכת!`, 'info');
+                    }
+                });
+                
+                orderSelect.addEventListener('change', (e) => {
+                    const selectedOrder = MOCK_DATA.orders.find(o => o.id === e.target.value);
+                    if (selectedOrder) {
+                        state.formData.orderId = selectedOrder.id;
+                        state.formData.customerName = selectedOrder.customer;
+                        state.formData.customerAddress = selectedOrder.address;
+                        state.formData.items = selectedOrder.items;
+                        
+                        orderDetailsContainer.classList.remove('hidden');
+                        document.getElementById('order-id-display').textContent = selectedOrder.id;
+                        document.getElementById('order-date-display').textContent = new Date().toLocaleDateString('he-IL');
+                        document.getElementById('customer-name-display').textContent = selectedOrder.customer;
+                        document.getElementById('customer-address-display').textContent = selectedOrder.address;
+                        
+                        const tbody = document.getElementById('order-items-tbody');
+                        tbody.innerHTML = '';
+                        selectedOrder.items.forEach(item => {
+                            tbody.innerHTML += `
+                                <tr class="bg-white border-b">
+                                    <td class="px-6 py-4">${item.sku}</td>
+                                    <td class="px-6 py-4">${item.desc}</td>
+                                    <td class="px-6 py-4">${item.qty}</td>
+                                </tr>
+                            `;
+                        });
+                        showAppMessage(`הזמנה מספר ${state.formData.orderId} נטענה בהצלחה.`, 'success');
+                    }
+                });
+                
+                document.getElementById('crane-work-type-group').addEventListener('click', (e) => {
+                    if (e.target.tagName === 'BUTTON') {
+                        const value = e.target.dataset.value;
+                        state.formData.craneWorkType = value;
+                        
+                        document.querySelectorAll('#crane-work-type-group button').forEach(btn => btn.classList.remove('btn-choice-active'));
+                        e.target.classList.add('btn-choice-active');
+                        
+                        if (value === 'העברה מאתר לאתר') {
+                            document.getElementById('transfer-modal').classList.remove('hidden');
+                            document.getElementById('transfer-modal').querySelector('.modal-content').classList.add('show');
+                        }
+                    }
+                });
+
+                document.getElementById('add-return-item-btn').addEventListener('click', addReturnItem);
+                
+                document.getElementById('clear-signature-btn').addEventListener('click', () => signaturePad.clear());
+                
+                document.getElementById('open-camera-btn').addEventListener('click', () => document.getElementById('camera-input').click());
+                
+                document.getElementById('camera-input').addEventListener('change', (event) => {
+                    if (event.target.files && event.target.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            state.formData.images.push(e.target.result);
+                            const previewContainer = document.getElementById('image-previews');
+                            const imgWrapper = document.createElement('div');
+                            imgWrapper.className = 'relative';
+                            imgWrapper.innerHTML = `<img src="${e.target.result}" class="w-full h-24 object-cover rounded-lg shadow"><button class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center font-bold">X</button>`;
+                            previewContainer.appendChild(imgWrapper);
+                            
+                            imgWrapper.querySelector('button').onclick = () => {
+                                state.formData.images = state.formData.images.filter(img => img !== e.target.result);
+                                imgWrapper.remove();
+                            };
+                        };
+                        reader.readAsDataURL(event.target.files[0]);
+                    }
+                });
+                
+                document.getElementById('confirm-transfer-btn').addEventListener('click', () => {
+                    state.formData.transferFrom = document.getElementById('transfer-from').value;
+                    state.formData.transferTo = document.getElementById('transfer-to').value;
+                    document.getElementById('transfer-modal').classList.add('hidden');
+                    document.getElementById('transfer-modal').querySelector('.modal-content').classList.remove('show');
+                });
+                document.getElementById('cancel-transfer-btn').addEventListener('click', () => {
+                    document.getElementById('transfer-modal').classList.add('hidden');
+                    document.getElementById('transfer-modal').querySelector('.modal-content').classList.remove('show');
+                });
+                 document.getElementById('close-confirmation-btn').addEventListener('click', () => {
+                    document.getElementById('confirmation-modal').classList.add('hidden');
+                    document.getElementById('confirmation-modal').querySelector('.modal-content').classList.remove('show');
+                    window.location.reload();
+                });
+
+                // Event listeners for time inputs to trigger calculation and performance check
+                document.getElementById('wait-start-time').addEventListener('input', () => { calculateAndDisplayTimes(); checkDriverPerformance(); });
+                document.getElementById('wait-end-time').addEventListener('input', () => { calculateAndDisplayTimes(); checkDriverPerformance(); });
+                document.getElementById('crane-start-time').addEventListener('input', () => { calculateAndDisplayTimes(); checkDriverPerformance(); });
+                document.getElementById('crane-end-time').addEventListener('input', () => { calculateAndDisplayTimes(); checkDriverPerformance(); });
+
+                // WhatsApp buttons for dispatch
+                document.getElementById('whatsapp-complete-btn').addEventListener('click', () => {
+                    const driverName = state.formData.driver || 'הנהג';
+                    sendWhatsAppMessage(`${driverName} סיים את הפעולה שלו ומוכן למשימה הבאה.`);
+                    showAppMessage('הודעת סיום פעולה נשלחה למחלקת סידור.', 'success');
+                });
+
+                document.getElementById('whatsapp-delay-btn').addEventListener('click', () => {
+                    const driverName = state.formData.driver || 'הנהג';
+                    const orderId = state.formData.orderId || state.formData.newOrderId || 'לא צוין';
+                    const totalWaitMinutes = state.formData.totalWaitMinutes || 0;
+                    sendWhatsAppMessage(`עיכוב בהזמנה ${orderId} עבור ${driverName}. זמן המתנה: ${totalWaitMinutes} דקות. אנא בדוק.`);
+                    showAppMessage('הודעת עיכוב נשלחה למחלקת סידור.', 'info');
+                });
+
+                document.getElementById('whatsapp-issue-btn').addEventListener('click', () => {
+                    const driverName = state.formData.driver || 'הנהג';
+                    const orderId = state.formData.orderId || state.formData.newOrderId || 'לא צוין';
+                    const issueNotes = prompt('אנא פרט את הבעיה:'); // Using prompt for simplicity, ideally a custom modal
+                    if (issueNotes) {
+                        sendWhatsAppMessage(`בעיה בהזמנה ${orderId} עבור ${driverName}: ${issueNotes}. אנא בדוק.`);
+                        showAppMessage('הודעת בעיה נשלחה למחלקת סידור.', 'error');
+                    } else {
+                        showAppMessage('דיווח הבעיה בוטל.', 'info');
+                    }
+                });
+            }
+
+            window.addEventListener('resize', () => {
+                const canvas = document.getElementById('signature-pad');
+                if (canvas && signaturePad) {
+                    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                    canvas.width = canvas.offsetWidth * ratio;
+                    canvas.height = canvas.offsetHeight * ratio;
+                    canvas.getContext("2d").scale(ratio, ratio);
+                    signaturePad.clear();
+                }
+            });
+            window.dispatchEvent(new Event('resize'));
+            
+            initialize();
+        });
+    </script>
+</body>
+</html>

@@ -193,7 +193,7 @@
         }
         .whatsapp-btn:active {
             transform: translateY(0);
-            box-shadow: 0 2px 5px rgba(37, 211, 102, 0.1);
+            box-shadow: 0 2px 5px (37, 211, 102, 0.1);
         }
 
         /* Logo effect - enhanced */
@@ -1144,7 +1144,7 @@
                 // Scale factor adjusted for A4 size and content density.
                 // A higher scale means better quality, but also larger memory usage.
                 // Adjust this value if content still overflows or quality is too low.
-                const scaleFactor = 1.8; // Adjusted from 2 for better fit on A4 without overflow
+                const scaleFactor = 1.5; // Adjusted from 1.8 for even smaller PDF size
                 const pdfCanvas = await html2canvas(pdfTemplate, { 
                     scale: scaleFactor, 
                     useCORS: true, 

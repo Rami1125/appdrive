@@ -222,25 +222,25 @@
         .pdf-header-info {
             font-size: 8px; /* Smaller font for contact details */
             text-align: left;
-            color: #555;
+            color: #333; /* Darker color */
             margin-top: 2px; /* Smaller margin */
             line-height: 1.2; /* Tighter line height */
         }
         .pdf-section-title {
             font-size: 14px; /* Smaller font for section titles */
             font-weight: bold;
-            color: #004c99; /* Darker blue for titles */
+            color: #003366; /* Even darker blue for titles */
             margin-top: 8px; /* Smaller margin */
             margin-bottom: 4px; /* Smaller margin */
-            border-bottom: 1px solid #cce7f5;
-            padding-bottom: 3px; /* Smaller padding */
+            border-bottom: 2px solid #a7d9ed; /* Thicker, slightly darker blue border */
+            padding-bottom: 4px; /* Slightly more padding */
         }
         .pdf-data-label {
             font-weight: bold;
-            color: #333;
+            color: #222; /* Darker for labels */
         }
         .pdf-data-value {
-            color: #555;
+            color: #444; /* Darker for values */
             font-size: 10px; /* Smaller font for data values */
         }
         .pdf-table {
@@ -250,40 +250,41 @@
             font-size: 9px; /* Smaller font for table content */
         }
         .pdf-table th, .pdf-table td {
-            border: 1px solid #ddd;
-            padding: 4px; /* Smaller padding */
+            border: 1px solid #a7d9ed; /* Darker border */
+            padding: 5px; /* Slightly more padding */
             text-align: right;
         }
         .pdf-table th {
-            background-color: #f0f8ff;
-            color: #004c99;
+            background-color: #cce7f5; /* Slightly darker background */
+            font-weight: 700;
+            color: #004c99; /* Darker blue text */
         }
         .pdf-stamp-box {
-            border: 1px solid #007bff; /* Thinner border */
-            padding: 8px; /* Smaller padding */
-            border-radius: 6px; /* Smaller radius */
-            margin-top: 10px; /* Smaller margin */
-            background-color: rgba(240, 248, 255, 0.5);
-            font-size: 9px; /* Smaller font */
+            border: 2px solid #007bff; /* Thicker border */
+            padding: 10px; /* More padding */
+            border-radius: 8px; /* Larger radius */
+            margin-top: 12px; /* Slightly more margin */
+            background-color: rgba(240, 248, 255, 0.7); /* Less transparent background */
+            font-size: 10px; /* Slightly larger font */
         }
         .pdf-stamp-box h4 {
-            font-size: 12px; /* Smaller font for stamp title */
-            margin-bottom: 5px; /* Smaller margin */
+            font-size: 13px; /* Slightly larger font for stamp title */
+            margin-bottom: 6px; /* Slightly more margin */
         }
         .pdf-signature-area {
-            border-bottom: 1px solid #333;
-            height: 30mm; /* Fixed height for signature - reduced */
+            border-bottom: 2px solid #333; /* Thicker signature line */
+            height: 35mm; /* Slightly increased height for signature */
             display: flex;
             justify-content: center;
             align-items: center;
             margin: 0 auto;
-            max-width: 80mm; /* Max width for signature box - reduced */
+            max-width: 90mm; /* Increased max width for signature box */
         }
         .pdf-copyright {
-            font-size: 8px; /* Smaller font */
+            font-size: 9px; /* Slightly larger font */
             text-align: center;
-            color: #888;
-            margin-top: 15px; /* Smaller margin */
+            color: #666; /* Darker color */
+            margin-top: 20px; /* More margin */
         }
     </style>
 </head>
@@ -1033,10 +1034,10 @@
 
                 // Build the PDF content with enhanced styling and tables
                 let pdfContentHtml = `
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #004c99; padding-bottom: 5px; margin-bottom: 8px;">
-                        <img src="${document.querySelector('header img').src}" style="width: 25mm; height: 25mm; object-fit: contain;">
-                        <div style="text-align: left; color: #004c99;">
-                            <h1 style="font-size: 18px; font-weight: bold; margin: 0;">ח. סבן - חומרי בנין 1994 בע"מ</h1>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #003366; padding-bottom: 6px; margin-bottom: 10px;">
+                        <img src="${document.querySelector('header img').src}" style="width: 28mm; height: 28mm; object-fit: contain;">
+                        <div style="text-align: left; color: #003366;">
+                            <h1 style="font-size: 19px; font-weight: bold; margin: 0;">ח. סבן - חומרי בנין 1994 בע"מ</h1>
                             <div class="pdf-header-info">
                                 <p>סניף 1: התלמיד 6, הוד השרון | טלפון: 09-7602010 | פקס: 09-7429786</p>
                                 <p>סניף 2: החרש 10, נווה נאמן | טלפון: 09-740575 | פקס: 09-7402571</p>
@@ -1045,13 +1046,13 @@
                             </div>
                         </div>
                     </div>
-                    <h2 style="text-align: center; font-size: 16px; font-weight: bold; margin: 10px 0; text-decoration: underline; color: #007bff;">תעודת עבודה / משלוח</h2>
-                    <p style="text-align: left; font-size: 10px; margin-bottom: 3px;"><strong class="pdf-data-label">מספר אסמכתא:</strong> <span class="pdf-data-value">${state.formData.serialNumber}</span></p>
-                    <p style="text-align: left; font-size: 10px; margin-bottom: 8px;"><strong class="pdf-data-label">תאריך הפקה:</strong> <span class="pdf-data-value">${new Date().toLocaleDateString('he-IL')}</span></p>
+                    <h2 style="text-align: center; font-size: 17px; font-weight: bold; margin: 12px 0; text-decoration: underline; color: #0056b3;">תעודת עבודה / משלוח</h2>
+                    <p style="text-align: left; font-size: 11px; margin-bottom: 4px;"><strong class="pdf-data-label">מספר אסמכתא:</strong> <span class="pdf-data-value">${state.formData.serialNumber}</span></p>
+                    <p style="text-align: left; font-size: 11px; margin-bottom: 10px;"><strong class="pdf-data-label">תאריך הפקה:</strong> <span class="pdf-data-value">${new Date().toLocaleDateString('he-IL')}</span></p>
                     
-                    <div style="border: 1px solid #cce7f5; padding: 10px; border-radius: 8px; margin-bottom: 10px; background-color: rgba(240, 248, 255, 0.5);">
+                    <div style="border: 2px solid #a7d9ed; padding: 12px; border-radius: 10px; margin-bottom: 12px; background-color: rgba(240, 248, 255, 0.7);">
                         <h3 class="pdf-section-title">פרטי הזמנה</h3>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 10px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px;">
                             <div><strong class="pdf-data-label">שם נהג:</strong> <span class="pdf-data-value">${state.formData.driver} (${state.formData.vehicle || 'ללא רכב'})</span></div>
                             <div><strong class="pdf-data-label">מס' הזמנה:</strong> <span class="pdf-data-value">${orderIdToDisplay || 'לא צוין'}</span></div>
                             <div><strong class="pdf-data-label">שם לקוח:</strong> <span class="pdf-data-value">${customerNameToDisplay || 'לא צוין'}</span></div>
@@ -1062,7 +1063,7 @@
                         </div>
                     </div>
 
-                    <div style="border: 1px solid #cce7f5; padding: 10px; border-radius: 8px; margin-bottom: 10px; background-color: rgba(240, 248, 255, 0.5);">
+                    <div style="border: 2px solid #a7d9ed; padding: 12px; border-radius: 10px; margin-bottom: 12px; background-color: rgba(240, 248, 255, 0.7);">
                         <h3 class="pdf-section-title">תיעוד זמנים</h3>
                         <table class="pdf-table">
                             <thead>
@@ -1076,27 +1077,27 @@
                             <tbody>
                                 <tr>
                                     <td><strong>זמן המתנה</strong></td>
-                                    <td><span style="font-size: 10px; font-weight: bold;">${state.formData.waitStartTime || 'לא צוין'}</span></td>
-                                    <td><span style="font-size: 10px; font-weight: bold;">${state.formData.waitEndTime || 'לא צוין'}</span></td>
-                                    <td><span style="font-size: 10px; font-weight: bold; color: #007bff;">${state.formData.totalWaitMinutes || 0}</span></td>
+                                    <td><span style="font-size: 11px; font-weight: bold;">${state.formData.waitStartTime || 'לא צוין'}</span></td>
+                                    <td><span style="font-size: 11px; font-weight: bold;">${state.formData.waitEndTime || 'לא צוין'}</span></td>
+                                    <td><span style="font-size: 11px; font-weight: bold; color: #007bff;">${state.formData.totalWaitMinutes || 0}</span></td>
                                 </tr>
                                 <tr>
                                     <td><strong>זמן מנוף</strong></td>
-                                    <td><span style="font-size: 10px; font-weight: bold;">${state.formData.craneStartTime || 'לא צוין'}</span></td>
-                                    <td><span style="font-size: 10px; font-weight: bold;">${state.formData.craneEndTime || 'לא צוין'}</span></td>
-                                    <td><span style="font-size: 10px; font-weight: bold; color: #007bff;">${state.formData.totalCraneMinutes || 0}</span></td>
+                                    <td><span style="font-size: 11px; font-weight: bold;">${state.formData.craneStartTime || 'לא צוין'}</span></td>
+                                    <td><span style="font-size: 11px; font-weight: bold;">${state.formData.craneEndTime || 'לא צוין'}</span></td>
+                                    <td><span style="font-size: 11px; font-weight: bold; color: #007bff;">${state.formData.totalCraneMinutes || 0}</span></td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <div style="border: 1px solid #cce7f5; padding: 10px; border-radius: 8px; margin-bottom: 10px; background-color: rgba(240, 248, 255, 0.5);">
+                    <div style="border: 2px solid #a7d9ed; padding: 12px; border-radius: 10px; margin-bottom: 12px; background-color: rgba(240, 248, 255, 0.7);">
                         <h3 class="pdf-section-title">פרטי עבודה והחזרות</h3>
-                        <p style="font-size: 10px; margin-bottom: 5px;"><strong class="pdf-data-label">סוג עבודת מנוף:</strong> <span class="pdf-data-value">${state.formData.craneWorkType || 'לא צוין'}</span></p>
-                        ${state.formData.craneWorkType === 'העברה מאתר לאתר' ? `<p style="font-size: 10px;"><strong class="pdf-data-label">הועבר מ:</strong> <span class="pdf-data-value">${state.formData.transferFrom || 'לא צוין'}</span><br><strong class="pdf-data-label">אל:</strong> <span class="pdf-data-value">${state.formData.transferTo || 'לא צוין'}</span></p>` : ''}
+                        <p style="font-size: 11px; margin-bottom: 6px;"><strong class="pdf-data-label">סוג עבודת מנוף:</strong> <span class="pdf-data-value">${state.formData.craneWorkType || 'לא צוין'}</span></p>
+                        ${state.formData.craneWorkType === 'העברה מאתר לאתר' ? `<p style="font-size: 11px;"><strong class="pdf-data-label">הועבר מ:</strong> <span class="pdf-data-value">${state.formData.transferFrom || 'לא צוין'}</span><br><strong class="pdf-data-label">אל:</strong> <span class="pdf-data-value">${state.formData.transferTo || 'לא צוין'}</span></p>` : ''}
                         
                         ${state.formData.returns.filter(r=>r.item).length > 0 ? `
-                            <h4 style="font-size: 12px; font-weight: bold; margin-top: 8px; margin-bottom: 3px; color: #004c99;">החזרות:</h4>
+                            <h4 style="font-size: 13px; font-weight: bold; margin-top: 10px; margin-bottom: 4px; color: #003366;">החזרות:</h4>
                             <table class="pdf-table">
                                 <thead>
                                     <tr>
@@ -1110,12 +1111,12 @@
                             </table>
                         ` : ''}
                         
-                        ${state.formData.notes ? `<h4 style="font-size: 12px; font-weight: bold; margin-top: 8px; margin-bottom: 3px; color: #004c99;">הערות נהג:</h4><p style="border: 1px solid #cce7f5; padding: 5px; border-radius: 5px; font-size: 10px; background-color: rgba(255, 255, 255, 0.8);">${state.formData.notes}</p>` : ''}
+                        ${state.formData.notes ? `<h4 style="font-size: 13px; font-weight: bold; margin-top: 10px; margin-bottom: 4px; color: #003366;">הערות נהג:</h4><p style="border: 1px solid #a7d9ed; padding: 6px; border-radius: 6px; font-size: 11px; background-color: rgba(255, 255, 255, 0.9);">${state.formData.notes}</p>` : ''}
                     </div>
 
                     <div class="pdf-stamp-box">
-                        <h4 style="font-size: 12px; font-weight: bold; text-align: center; margin-bottom: 5px; color: #004c99;">חותמת דיגיטלית</h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3px; font-size: 9px;">
+                        <h4 style="font-size: 14px; font-weight: bold; text-align: center; margin-bottom: 6px; color: #003366;">חותמת דיגיטלית</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 10px;">
                             <div><strong class="pdf-data-label">שם נהג:</strong> <span class="pdf-data-value">${state.formData.driver || 'לא צוין'}</span></div>
                             <div><strong class="pdf-data-label">שם לקוח:</strong> <span class="pdf-data-value">${customerNameToDisplay || 'לא צוין'}</span></div>
                             <div style="grid-column: 1 / span 2;"><strong class="pdf-data-label">כתובת:</strong> <span class="pdf-data-value">${customerAddressToDisplay || 'לא צוין'}</span></div>
@@ -1123,15 +1124,15 @@
                         </div>
                     </div>
 
-                    <div style="text-align: center; margin-top: 15px;">
-                        <h4 style="font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #004c99;">אישור קבלת שירות / סחורה</h4>
-                        <p style="font-size: 10px; margin-bottom: 8px;">אני הח"מ, <strong class="pdf-data-value">${state.formData.receiverName || 'לא צוין'}</strong>, מאשר קבלת השירות/הסחורה.</p>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <h4 style="font-size: 14px; font-weight: bold; margin-bottom: 6px; color: #003366;">אישור קבלת שירות / סחורה</h4>
+                        <p style="font-size: 11px; margin-bottom: 10px;">אני הח"מ, <strong class="pdf-data-value">${state.formData.receiverName || 'לא צוין'}</strong>, מאשר קבלת השירות/הסחורה.</p>
                         <div class="pdf-signature-area">
-                            ${state.formData.signature ? `<img src="${state.formData.signature}" style="max-width: 90%; max-height: 90%; object-fit: contain;">` : `<p style="font-size: 10px; color: #777;">אין חתימה</p>`}
+                            ${state.formData.signature ? `<img src="${state.formData.signature}" style="max-width: 95%; max-height: 95%; object-fit: contain;">` : `<p style="font-size: 11px; color: #555; font-weight: bold;">אין חתימה</p>`}
                         </div>
-                        <p style="font-size: 9px; margin-top: 3px; color: #555;"><strong class="pdf-data-label">שם החותם:</strong> <span class="pdf-data-value">${state.formData.receiverName || 'לא צוין'}</span></p>
-                        <p style="font-size: 9px; margin-top: 1px; color: #555;"><strong class="pdf-data-label">שעת חתימה:</strong> <span class="pdf-data-value">${new Date().toLocaleTimeString('he-IL')}</span></p>
-                        <p style="font-size: 9px; margin-top: 1px; color: #555;"><strong class="pdf-data-label">מיקום חתימה:</strong> <span class="pdf-data-value">${locationDisplay}</span></p>
+                        <p style="font-size: 10px; margin-top: 4px; color: #444;"><strong class="pdf-data-label">שם החותם:</strong> <span class="pdf-data-value">${state.formData.receiverName || 'לא צוין'}</span></p>
+                        <p style="font-size: 10px; margin-top: 2px; color: #444;"><strong class="pdf-data-label">שעת חתימה:</strong> <span class="pdf-data-value">${new Date().toLocaleTimeString('he-IL')}</span></p>
+                        <p style="font-size: 10px; margin-top: 2px; color: #444;"><strong class="pdf-data-label">מיקום חתימה:</strong> <span class="pdf-data-value">${locationDisplay}</span></p>
                     </div>
                     <div class="pdf-copyright">
                         <p>כל הזכויות שמורות לח.סבן חומרי בניין 1994</p>
@@ -1144,7 +1145,7 @@
                 // Scale factor adjusted for A4 size and content density.
                 // A higher scale means better quality, but also larger memory usage.
                 // Adjust this value if content still overflows or quality is too low.
-                const scaleFactor = 1.5; // Adjusted from 1.8 for even smaller PDF size
+                const scaleFactor = 1.5; 
                 const pdfCanvas = await html2canvas(pdfTemplate, { 
                     scale: scaleFactor, 
                     useCORS: true, 
